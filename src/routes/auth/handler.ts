@@ -1,16 +1,30 @@
 import { Router } from "express";
-import db from "../../db";
-import { users } from "../../db/schema/users";
+import { validateData } from "../../middlewares/validateData";
+import { signUpValidation } from "./validation";
+import { signUpService } from "./service";
+import { StatusCodes } from "http-status-codes";
 
 const router = Router();
 
-router.get("/sign-up", async (req, res) => {
-    try {
-        const a = await db.select().from(users);
-        res.send({ data: a });
-    } catch (err) {
-        res.status(400).send({ error: err });
+router.post(
+    "/sign-up",
+    validateData(signUpValidation),
+    async (req, res, next) => {
+        try {
+            const { username, password, name } = req.body;
+            const { accessToken, refreshToken } = await signUpService({
+                username,
+                password,
+                name,
+            });
+            res.status(StatusCodes.CREATED).send({
+                status: "success",
+                data: { accessToken, refreshToken },
+            });
+        } catch (err) {
+            next(err);
+        }
     }
-});
+);
 
 export { router };
