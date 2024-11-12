@@ -1,10 +1,10 @@
-import { SignUpData } from "./types";
+import { UserInsertType } from "./types";
 import db from "../../db";
 import { users } from "../../db/schema/users";
 import { eq } from "drizzle-orm";
 import { refreshTokens } from "../../db/schema/refreshTokens";
 
-export const signUpController = async (data: SignUpData) => {
+export const signUpController = async (data: UserInsertType) => {
   return db
     .insert(users)
     .values({
