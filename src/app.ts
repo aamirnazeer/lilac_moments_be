@@ -9,7 +9,7 @@ app.use(json());
 
 app.use("/api", router);
 
-app.use("*", notFoundHandler);
+app.use("/api/*", notFoundHandler);
 
 app.use(errorHandler);
 

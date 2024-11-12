@@ -1,12 +1,12 @@
 export class CustomError extends Error {
-    public statusCode: number;
-    public details?: any;
+  public statusCode: number;
+  public details?: any;
 
-    constructor(statusCode: number, message: string, details?: any) {
-        super(message);
-        this.statusCode = statusCode;
-        this.details = details;
+  constructor(statusCode: number, message: string, details?: any) {
+    super(message);
+    this.statusCode = statusCode;
+    this.details = details;
 
-        Object.setPrototypeOf(this, CustomError.prototype);
-    }
+    Object.setPrototypeOf(this, CustomError.prototype);
+  }
 }

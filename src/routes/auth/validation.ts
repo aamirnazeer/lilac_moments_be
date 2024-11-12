@@ -1,7 +1,4 @@
-import { z } from "zod";
+import { createInsertSchema } from "drizzle-zod";
+import { users } from "../../db/schema/users";
 
-export const signUpValidation = z.object({
-    username: z.string(),
-    password: z.string().min(4),
-    name: z.string(),
-});
+export const usersInsertValidation = createInsertSchema(users).strict();
