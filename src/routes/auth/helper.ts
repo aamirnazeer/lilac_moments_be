@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { TokenOriginTypes, TokenTypes, UserSelectType } from "./types";
+import { CurrentUserType, TokenOriginTypes, TokenTypes, UserSelectType } from "./types";
 import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from "../../core/env";
 
 export const createHashedPassword = (password: string) => {
@@ -10,11 +10,11 @@ export const createHashedPassword = (password: string) => {
 };
 
 export const checkHashedPassword = (password: string, hash: string) => {
-  bcrypt.compareSync(password, hash);
+  return bcrypt.compareSync(password, hash);
 };
 
 export const createToken = (data: UserSelectType, type: TokenTypes, origin: TokenOriginTypes) => {
-  const payload = {
+  const payload: CurrentUserType = {
     uuid: data.uuid,
     id: data.id,
     name: data.name,
@@ -22,7 +22,12 @@ export const createToken = (data: UserSelectType, type: TokenTypes, origin: Toke
     origin: origin,
   };
   const secret = type === "access" ? ACCESS_TOKEN_SECRET! : REFRESH_TOKEN_SECRET!;
-  const expiresIn = type === "access" ? 5 * 60 : 60 * 60;
+  const expiresIn = type === "access" ? 10 : 60 * 60;
 
   return jwt.sign(payload, secret, { expiresIn });
+};
+
+export const readToken = (token: string, type: TokenTypes): string | jwt.JwtPayload | CurrentUserType => {
+  const secret = type === "access" ? ACCESS_TOKEN_SECRET! : REFRESH_TOKEN_SECRET!;
+  return jwt.verify(token, secret) as CurrentUserType;
 };

@@ -1,12 +1,21 @@
-import { UserInsertType } from "./types";
-import { findUserByUsername, signUpController, storeRefreshToken } from "./controller";
-import { createHashedPassword, createToken } from "./helper";
+import { CurrentUserType, SignIntype, UserInsertType } from "./types";
+import {
+  findUserByUsername,
+  signUpController,
+  storeRefreshToken,
+  signOutController,
+  getRefreshToken,
+  findUserByUserId,
+  findTokenByUserId,
+} from "./controller";
+import { checkHashedPassword, createHashedPassword, createToken } from "./helper";
 import { CustomError } from "../../utils/CustomError";
 import { StatusCodes } from "http-status-codes";
+import { refreshTokens } from "../../db/schema/refreshTokens";
 
 export const signUpService = async (data: UserInsertType) => {
-  const existingUser = await findUserByUsername(data.username);
-  if (existingUser.length) {
+  const [existingUser] = await findUserByUsername(data.username);
+  if (existingUser) {
     throw new CustomError(StatusCodes.CONFLICT, "username exists already");
   }
   data.password = createHashedPassword(data.password);
@@ -15,4 +24,31 @@ export const signUpService = async (data: UserInsertType) => {
   const refreshToken = createToken(newUser, "refresh", "auth");
   await storeRefreshToken(refreshToken, newUser.id);
   return { accessToken, refreshToken };
+};
+
+export const signInService = async (data: SignIntype) => {
+  const [existingUser] = await findUserByUsername(data.username);
+  if (!existingUser) throw new CustomError(StatusCodes.NOT_FOUND, "cannot find username");
+  const passwordMatch = checkHashedPassword(data.password, existingUser.password);
+  if (!passwordMatch) throw new CustomError(StatusCodes.NOT_FOUND, "credentials error");
+
+  const accessToken = createToken(existingUser, "access", "auth");
+  const refreshToken = createToken(existingUser, "refresh", "auth");
+  await storeRefreshToken(refreshToken, existingUser.id);
+  return { accessToken, refreshToken };
+};
+
+export const signOutService = async (token: string) => {
+  if (!token) throw new CustomError(StatusCodes.FORBIDDEN, "logged out already");
+  const [user] = await findTokenByUserId(token);
+  await signOutController(user.id);
+};
+
+export const refreshTokenService = async (token: string) => {
+  const [refreshToken] = await getRefreshToken(token);
+  if (!refreshToken) throw new CustomError(StatusCodes.UNAUTHORIZED, "credentials error");
+  const [existingUser] = await findUserByUserId(refreshToken.user_id);
+  if (!existingUser) throw new CustomError(StatusCodes.UNAUTHORIZED, "credentials error");
+  const accessToken = createToken(existingUser, "access", "refresh");
+  return { accessToken };
 };
