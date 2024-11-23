@@ -12,9 +12,9 @@ app.use(cookieParser());
 
 app.use(morgan("dev"));
 
-app.use("/api", router);
+app.use(router);
 
-app.use("/api/*", notFoundHandler);
+app.use("/*", notFoundHandler);
 
 app.use(errorHandler);
 
