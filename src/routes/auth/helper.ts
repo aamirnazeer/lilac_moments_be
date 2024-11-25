@@ -22,7 +22,7 @@ export const createToken = (data: UserSelectType, type: TokenTypes, origin: Toke
     origin: origin,
   };
   const secret = type === "access" ? ACCESS_TOKEN_SECRET! : REFRESH_TOKEN_SECRET!;
-  const expiresIn = type === "access" ? 10 : 60 * 60;
+  const expiresIn = type === "access" ? 10 * 60 : 24 * 60 * 60;
 
   return jwt.sign(payload, secret, { expiresIn });
 };

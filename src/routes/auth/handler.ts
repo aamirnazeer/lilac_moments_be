@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { validateData } from "../../middlewares/validateData";
-import { signInValidation, usersInsertValidation, refreshTokenValidation } from "./validation";
+import { signInValidation, usersInsertValidation } from "./validation";
 import { signUpService, signInService, signOutService, refreshTokenService } from "./service";
 import { StatusCodes } from "http-status-codes";
 import { validateRefreshTokenMiddleware, validateRequestMiddleware } from "./middleware";
@@ -56,7 +56,7 @@ router.post("/sign-out", async (req, res, next) => {
   }
 });
 
-router.post("/refresh-token", validateRefreshTokenMiddleware, async (req, res, next) => {
+router.get("/refresh-token", validateRefreshTokenMiddleware, async (req, res, next) => {
   try {
     const { refreshToken } = req.cookies;
     const { accessToken } = await refreshTokenService(refreshToken);
@@ -69,10 +69,12 @@ router.post("/refresh-token", validateRefreshTokenMiddleware, async (req, res, n
   }
 });
 
-router.post("/protected", validateRequestMiddleware, async (_req, res, next) => {
+router.get("/current-user", validateRequestMiddleware, async (req, res, next) => {
   try {
+    const { currentUser } = req;
     res.status(StatusCodes.OK).send({
       status: "success",
+      currentUser,
     });
   } catch (err) {
     next(err);

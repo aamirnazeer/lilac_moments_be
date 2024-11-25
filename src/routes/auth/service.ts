@@ -1,4 +1,4 @@
-import { CurrentUserType, SignIntype, UserInsertType } from "./types";
+import { SignIntype, UserInsertType } from "./types";
 import {
   findUserByUsername,
   signUpController,
@@ -11,7 +11,6 @@ import {
 import { checkHashedPassword, createHashedPassword, createToken } from "./helper";
 import { CustomError } from "../../utils/CustomError";
 import { StatusCodes } from "http-status-codes";
-import { refreshTokens } from "../../db/schema/refreshTokens";
 
 export const signUpService = async (data: UserInsertType) => {
   const [existingUser] = await findUserByUsername(data.username);
@@ -28,9 +27,9 @@ export const signUpService = async (data: UserInsertType) => {
 
 export const signInService = async (data: SignIntype) => {
   const [existingUser] = await findUserByUsername(data.username);
-  if (!existingUser) throw new CustomError(StatusCodes.NOT_FOUND, "cannot find username");
+  if (!existingUser) throw new CustomError(StatusCodes.UNAUTHORIZED, "cannot find username");
   const passwordMatch = checkHashedPassword(data.password, existingUser.password);
-  if (!passwordMatch) throw new CustomError(StatusCodes.NOT_FOUND, "credentials error");
+  if (!passwordMatch) throw new CustomError(StatusCodes.UNAUTHORIZED, "credentials error");
 
   const accessToken = createToken(existingUser, "access", "auth");
   const refreshToken = createToken(existingUser, "refresh", "auth");
