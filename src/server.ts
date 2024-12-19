@@ -1,4 +1,4 @@
-import { app } from "./app";
+import { server } from "./app";
 import { ENV, PORT, DATABASE_URL, ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET } from "./core/env";
 
 async function main() {
@@ -8,13 +8,11 @@ async function main() {
   if (!ACCESS_TOKEN_SECRET) throw new Error("ACCESS_TOKEN_SECRET is not defined");
   if (!REFRESH_TOKEN_SECRET) throw new Error("REFRESH_TOKEN_SECRET is not defined");
 
-  app.listen(PORT, () => {
-    console.log(`${ENV} server stated on port ${PORT}`);
-  });
+  server.listen(PORT);
 }
 
 main()
-  .then()
+  .then(() => console.log(`${ENV} server stated on port ${PORT}`))
   .catch((err) => {
     console.log(err.message);
     process.exit(1);
